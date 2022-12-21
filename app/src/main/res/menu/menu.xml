@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- @author Perrenoud Pascal
+     @author Seem Thibault
+     @description Menu pour nettoyer le cache-->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app ="http://schemas.android.com/apk/res-auto">
+    <item
+        android:icon="@drawable/ic_baseline_loop_24"
+        android:id="@+id/menu_clean_cache"
+        android:title="menu_empty_cache"/>
+
+</menu>

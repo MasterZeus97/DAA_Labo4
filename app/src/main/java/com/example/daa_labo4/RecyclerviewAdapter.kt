@@ -66,7 +66,6 @@ class RecyclerviewAdapter(_lifeCycle : LifecycleCoroutineScope, _items : List<In
                 val file = File(context.cacheDir, "$numberPicture.jpg")
                 var save = false
 
-
                 //Test si le file exist et s'il n'est pas trop vieux
                 val bytes : ByteArray? =
 

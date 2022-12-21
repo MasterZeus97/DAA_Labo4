@@ -1,6 +1,8 @@
 package com.example.daa_labo4
 
+import android.R.attr.bitmap
 import android.content.ContentValues.TAG
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.util.Log
@@ -9,13 +11,19 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.ProgressBar
+import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
 import java.net.URL
+import java.util.concurrent.TimeUnit
 
-class RecyclerviewAdapter(_items : List<Int> = listOf()) : RecyclerView.Adapter<RecyclerviewAdapter.ViewHolder>() {
+
+class RecyclerviewAdapter(_lifeCycle : LifecycleCoroutineScope, _items : List<Int> = listOf()) : RecyclerView.Adapter<RecyclerviewAdapter.ViewHolder>() {
 
     var items = listOf<Int>()
         set(value){
@@ -23,11 +31,16 @@ class RecyclerviewAdapter(_items : List<Int> = listOf()) : RecyclerView.Adapter<
             notifyDataSetChanged()
         }
 
+    lateinit var lifeCycleScope : LifecycleCoroutineScope
+    private lateinit var context : Context
+
     init {
         items = _items
+        lifeCycleScope = _lifeCycle
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        context = parent.context
         return ViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.picture_layout, parent, false))
     }
 
@@ -40,11 +53,43 @@ class RecyclerviewAdapter(_items : List<Int> = listOf()) : RecyclerView.Adapter<
     inner class ViewHolder(view: View): RecyclerView.ViewHolder(view){
         private val imageToDisplay = view.findViewById<ImageView>(R.id.picture_recyclerview)
         private val progressBar = view.findViewById<ProgressBar>(R.id.progress_bar_recyclerview)
-        fun bind(numberPicture: Int){
-            //imageToDisplay.setImageBitmap(BitmapFactory.d)
-            activity.lifecycleScope.launch{
 
+        private val imagesCacheDir = File(view.context.cacheDir, "images")
+
+        fun bind(numberPicture: Int){
+
+
+
+
+            //imageToDisplay.setImageBitmap(BitmapFactory.d)
+            lifeCycleScope.launch{
+                val file = File(context.cacheDir, "$numberPicture.jpg")
+                var save = false
+
+
+                //Test si le file exist et s'il n'est pas trop vieux
+                val bytes : ByteArray? =
+
+                    if(file.exists() && TimeUnit.MILLISECONDS.toMinutes((System.currentTimeMillis() - file.lastModified())) < 5){
+                        val tmp = TimeUnit.MILLISECONDS.toMinutes((System.currentTimeMillis() - file.lastModified()))
+                        val tmp2 = tmp + 1
+                        file.readBytes()
+                    }else{
+                        save = true
+                        displayImage(null)
+                        downloadImage(URL("https://daa.iict.ch/images/$numberPicture.jpg"))
+                    }
+
+                val bmp = decodeImage(bytes)
+
+                if(save){
+                    cachePicture(bmp, numberPicture)
+                }
+
+                displayImage(bmp)
             }
+
+
         }
 
         suspend fun downloadImage(url : URL) : ByteArray? = withContext(Dispatchers.IO){
@@ -76,6 +121,12 @@ class RecyclerviewAdapter(_items : List<Int> = listOf()) : RecyclerView.Adapter<
             }
         }
 
-    }
+        suspend fun cachePicture(bmp: Bitmap?, numberPicture: Int) = withContext(Dispatchers.IO) {
 
+            val file = File(context.cacheDir, "$numberPicture.jpg")
+            file.outputStream().use {
+                bmp?.compress(Bitmap.CompressFormat.JPEG, 100, it)
+            }
+        }
+    }
 }

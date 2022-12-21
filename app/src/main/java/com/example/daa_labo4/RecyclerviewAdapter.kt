@@ -1,5 +1,11 @@
 package com.example.daa_labo4
 
+/**
+ * @author Perrenoud Pascal
+ * @author Seem Thibault
+ * @description Adapter qui gère le téléchargement et cache des images utilisées
+ */
+
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.graphics.Bitmap

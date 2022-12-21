@@ -1,5 +1,11 @@
 package com.example.daa_labo4
 
+/**
+ * @author Perrenoud Pascal
+ * @author Seem Thibault
+ * @description Point d'entrée, activité principale de l'application
+ */
+
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu

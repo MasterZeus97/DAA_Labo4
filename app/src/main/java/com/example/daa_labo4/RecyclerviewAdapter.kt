@@ -61,20 +61,16 @@ class RecyclerviewAdapter(_lifeCycle : LifecycleCoroutineScope, _items : List<In
         private val imageToDisplay = view.findViewById<ImageView>(R.id.picture_recyclerview)
         private val progressBar = view.findViewById<ProgressBar>(R.id.progress_bar_recyclerview)
 
-        fun bind(numberPicture: Int){
+        fun bind(numberPicture: Int) {
 
-            job = lifeCycleScope.launch{
+            job = lifeCycleScope.launch {
                 val file = File(context.cacheDir, "$numberPicture.jpg")
                 var save = false
 
                 //Test si le file exist et s'il n'est pas trop vieux
-                val bytes : ByteArray? =
-
-                    if(file.exists() && TimeUnit.MILLISECONDS.toMinutes((System.currentTimeMillis() - file.lastModified())) < 5){
-                        val tmp = TimeUnit.MILLISECONDS.toMinutes((System.currentTimeMillis() - file.lastModified()))
-                        val tmp2 = tmp + 1
+                val bytes : ByteArray? = if(file.exists() && TimeUnit.MILLISECONDS.toMinutes((System.currentTimeMillis() - file.lastModified())) < 5){
                         file.readBytes()
-                    }else{
+                    } else {
                         save = true
                         displayImage(null)
                         downloadImage(URL("https://daa.iict.ch/images/$numberPicture.jpg"))
@@ -82,14 +78,12 @@ class RecyclerviewAdapter(_lifeCycle : LifecycleCoroutineScope, _items : List<In
 
                 val bmp = decodeImage(bytes)
 
-                if(save){
+                if (save) {
                     cachePicture(bmp, numberPicture)
                 }
 
                 displayImage(bmp)
             }
-
-
         }
 
         suspend fun downloadImage(url : URL) : ByteArray? = withContext(Dispatchers.IO){

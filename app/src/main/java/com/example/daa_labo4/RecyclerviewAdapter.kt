@@ -54,6 +54,8 @@ class RecyclerviewAdapter(_lifeCycle : LifecycleCoroutineScope, _items : List<In
         private val imageToDisplay = view.findViewById<ImageView>(R.id.picture_recyclerview)
         private val progressBar = view.findViewById<ProgressBar>(R.id.progress_bar_recyclerview)
 
+        private val imagesCacheDir = File(view.context.cacheDir, "images")
+
         fun bind(numberPicture: Int){
 
 
@@ -63,9 +65,14 @@ class RecyclerviewAdapter(_lifeCycle : LifecycleCoroutineScope, _items : List<In
             lifeCycleScope.launch{
                 val file = File(context.cacheDir, "$numberPicture.jpg")
                 var save = false
+
+
                 //Test si le file exist et s'il n'est pas trop vieux
                 val bytes : ByteArray? =
+
                     if(file.exists() && TimeUnit.MILLISECONDS.toMinutes((System.currentTimeMillis() - file.lastModified())) < 5){
+                        val tmp = TimeUnit.MILLISECONDS.toMinutes((System.currentTimeMillis() - file.lastModified()))
+                        val tmp2 = tmp + 1
                         file.readBytes()
                     }else{
                         save = true
@@ -115,12 +122,11 @@ class RecyclerviewAdapter(_lifeCycle : LifecycleCoroutineScope, _items : List<In
         }
 
         suspend fun cachePicture(bmp: Bitmap?, numberPicture: Int) = withContext(Dispatchers.IO) {
-            val stream: FileOutputStream =
-                FileOutputStream("$numberPicture.jpg")
-            bmp?.compress(Bitmap.CompressFormat.PNG, 100, stream)
-            stream.close()
+
+            val file = File(context.cacheDir, "$numberPicture.jpg")
+            file.outputStream().use {
+                bmp?.compress(Bitmap.CompressFormat.JPEG, 100, it)
+            }
         }
-
     }
-
 }

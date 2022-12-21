@@ -5,8 +5,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app ="http://schemas.android.com/apk/res-auto">
     <item
-        android:icon="@drawable/ic_baseline_loop_24"
         android:id="@+id/menu_clean_cache"
-        android:title="menu_empty_cache"/>
+        android:title="@string/menu_empty_cache"
+        android:icon="@drawable/ic_baseline_loop_24"
+        app:showAsAction="ifRoom"/>
 
 </menu>

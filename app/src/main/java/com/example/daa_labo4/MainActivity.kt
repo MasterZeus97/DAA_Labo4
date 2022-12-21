@@ -7,6 +7,9 @@ import android.view.MenuItem
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.work.OneTimeWorkRequest
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 
 class MainActivity : AppCompatActivity() {
     lateinit var adapter: RecyclerviewAdapter
@@ -30,8 +33,13 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId){
             R.id.menu_clean_cache->{
+                val workManager = WorkManager.getInstance(applicationContext)
+                val myWorkRequest = OneTimeWorkRequestBuilder<MyWork>().build()
+                workManager.enqueue(myWorkRequest)
+                adapter.notifyDataSetChanged()
                 true
             }
+            else -> {true}
         }
     }
 

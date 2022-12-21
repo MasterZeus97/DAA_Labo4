@@ -14,6 +14,7 @@ import android.widget.ProgressBar
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -33,6 +34,7 @@ class RecyclerviewAdapter(_lifeCycle : LifecycleCoroutineScope, _items : List<In
 
     lateinit var lifeCycleScope : LifecycleCoroutineScope
     private lateinit var context : Context
+    var job : Job? = null
 
     init {
         items = _items
@@ -48,21 +50,20 @@ class RecyclerviewAdapter(_lifeCycle : LifecycleCoroutineScope, _items : List<In
         holder.bind(items[position])
     }
 
+    override fun onViewRecycled(holder: ViewHolder) {
+        job?.cancel()
+        super.onViewRecycled(holder)
+    }
+
     override fun getItemCount() = items.size
 
     inner class ViewHolder(view: View): RecyclerView.ViewHolder(view){
         private val imageToDisplay = view.findViewById<ImageView>(R.id.picture_recyclerview)
         private val progressBar = view.findViewById<ProgressBar>(R.id.progress_bar_recyclerview)
 
-        private val imagesCacheDir = File(view.context.cacheDir, "images")
-
         fun bind(numberPicture: Int){
 
-
-
-
-            //imageToDisplay.setImageBitmap(BitmapFactory.d)
-            lifeCycleScope.launch{
+            job = lifeCycleScope.launch{
                 val file = File(context.cacheDir, "$numberPicture.jpg")
                 var save = false
 

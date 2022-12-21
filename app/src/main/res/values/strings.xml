@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">DAA_Labo4</string>
+    <string name="menu_empty_cache">menu_empty_cache</string>
 </resources>

@@ -7,9 +7,8 @@ import android.view.MenuItem
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.work.OneTimeWorkRequest
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
+import androidx.work.*
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
     lateinit var adapter: RecyclerviewAdapter
@@ -24,6 +23,13 @@ class MainActivity : AppCompatActivity() {
         val listOfPicture = IntArray(10000){it}
         adapter.items = listOfPicture.asList()
 
+        val myPeriodicWorkRequest = PeriodicWorkRequestBuilder<MyWork>(15, TimeUnit.MINUTES)
+            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL,
+                PeriodicWorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
+            .build()
+
+        val workManager = WorkManager.getInstance(applicationContext)
+        workManager.enqueue(myPeriodicWorkRequest)
     }
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu,menu)

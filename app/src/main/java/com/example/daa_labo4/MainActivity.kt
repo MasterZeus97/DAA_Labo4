@@ -54,4 +54,11 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        adapter.listOfJob.forEach{
+            it?.cancel()
+        }
+    }
+
 }

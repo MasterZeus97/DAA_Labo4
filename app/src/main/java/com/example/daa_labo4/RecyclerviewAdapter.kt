@@ -37,6 +37,7 @@ class RecyclerviewAdapter(_lifeCycle : LifecycleCoroutineScope, _items : List<In
         }
 
     lateinit var lifeCycleScope : LifecycleCoroutineScope
+    var listOfJob : MutableList<Job?> = mutableListOf()
     private lateinit var context : Context
 
     init {
@@ -55,6 +56,7 @@ class RecyclerviewAdapter(_lifeCycle : LifecycleCoroutineScope, _items : List<In
 
     override fun onViewRecycled(holder: ViewHolder) {
         super.onViewRecycled(holder)
+        listOfJob.remove(holder.job)
         holder.stopJob()
     }
 
@@ -88,6 +90,7 @@ class RecyclerviewAdapter(_lifeCycle : LifecycleCoroutineScope, _items : List<In
 
                 displayImage(bmp)
             }
+            listOfJob.add(job)
         }
 
         suspend fun downloadImage(url : URL) : ByteArray? = withContext(Dispatchers.IO){

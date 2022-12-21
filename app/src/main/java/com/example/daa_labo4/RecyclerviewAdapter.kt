@@ -1,6 +1,11 @@
 package com.example.daa_labo4
 
-import android.R.attr.bitmap
+/**
+ * @author Perrenoud Pascal
+ * @author Seem Thibault
+ * @description Adapter qui gère le téléchargement et cache des images utilisées
+ */
+
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.graphics.Bitmap
@@ -14,10 +19,10 @@ import android.widget.ProgressBar
 import androidx.lifecycle.LifecycleCoroutineScope
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.io.FileOutputStream
 import java.io.IOException
 import java.net.URL
 import java.util.concurrent.TimeUnit
@@ -32,6 +37,7 @@ class RecyclerviewAdapter(_lifeCycle : LifecycleCoroutineScope, _items : List<In
         }
 
     lateinit var lifeCycleScope : LifecycleCoroutineScope
+    var listOfJob : MutableList<Job?> = mutableListOf()
     private lateinit var context : Context
 
     init {
@@ -48,33 +54,29 @@ class RecyclerviewAdapter(_lifeCycle : LifecycleCoroutineScope, _items : List<In
         holder.bind(items[position])
     }
 
+    override fun onViewRecycled(holder: ViewHolder) {
+        super.onViewRecycled(holder)
+        listOfJob.remove(holder.job)
+        holder.stopJob()
+    }
+
     override fun getItemCount() = items.size
 
     inner class ViewHolder(view: View): RecyclerView.ViewHolder(view){
         private val imageToDisplay = view.findViewById<ImageView>(R.id.picture_recyclerview)
         private val progressBar = view.findViewById<ProgressBar>(R.id.progress_bar_recyclerview)
+        var job : Job? = null
 
-        private val imagesCacheDir = File(view.context.cacheDir, "images")
+        fun bind(numberPicture: Int) {
 
-        fun bind(numberPicture: Int){
-
-
-
-
-            //imageToDisplay.setImageBitmap(BitmapFactory.d)
-            lifeCycleScope.launch{
+            job = lifeCycleScope.launch {
                 val file = File(context.cacheDir, "$numberPicture.jpg")
                 var save = false
 
-
                 //Test si le file exist et s'il n'est pas trop vieux
-                val bytes : ByteArray? =
-
-                    if(file.exists() && TimeUnit.MILLISECONDS.toMinutes((System.currentTimeMillis() - file.lastModified())) < 5){
-                        val tmp = TimeUnit.MILLISECONDS.toMinutes((System.currentTimeMillis() - file.lastModified()))
-                        val tmp2 = tmp + 1
+                val bytes : ByteArray? = if(file.exists() && TimeUnit.MILLISECONDS.toMinutes((System.currentTimeMillis() - file.lastModified())) < 5){
                         file.readBytes()
-                    }else{
+                    } else {
                         save = true
                         displayImage(null)
                         downloadImage(URL("https://daa.iict.ch/images/$numberPicture.jpg"))
@@ -82,14 +84,13 @@ class RecyclerviewAdapter(_lifeCycle : LifecycleCoroutineScope, _items : List<In
 
                 val bmp = decodeImage(bytes)
 
-                if(save){
+                if (save) {
                     cachePicture(bmp, numberPicture)
                 }
 
                 displayImage(bmp)
             }
-
-
+            listOfJob.add(job)
         }
 
         suspend fun downloadImage(url : URL) : ByteArray? = withContext(Dispatchers.IO){
@@ -121,12 +122,14 @@ class RecyclerviewAdapter(_lifeCycle : LifecycleCoroutineScope, _items : List<In
             }
         }
 
-        suspend fun cachePicture(bmp: Bitmap?, numberPicture: Int) = withContext(Dispatchers.IO) {
-
+        suspend fun cachePicture(bmp: Bitmap?, numberPicture: Int) = withContext(Dispatchers.Default) {
             val file = File(context.cacheDir, "$numberPicture.jpg")
             file.outputStream().use {
                 bmp?.compress(Bitmap.CompressFormat.JPEG, 100, it)
             }
+        }
+        fun stopJob(){
+            job?.cancel()
         }
     }
 }

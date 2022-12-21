@@ -24,12 +24,11 @@ class MainActivity : AppCompatActivity() {
         adapter.items = listOfPicture.asList()
 
         val myPeriodicWorkRequest = PeriodicWorkRequestBuilder<MyWork>(15, TimeUnit.MINUTES)
-            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL,
-                PeriodicWorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
+            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, PeriodicWorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
             .build()
 
         val workManager = WorkManager.getInstance(applicationContext)
-        workManager.enqueue(myPeriodicWorkRequest)
+        workManager.enqueueUniquePeriodicWork("repeatCleanCacheWorker", ExistingPeriodicWorkPolicy.KEEP, myPeriodicWorkRequest)
     }
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu,menu)

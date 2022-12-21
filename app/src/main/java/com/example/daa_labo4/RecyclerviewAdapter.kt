@@ -1,6 +1,5 @@
 package com.example.daa_labo4
 
-import android.R.attr.bitmap
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.graphics.Bitmap
@@ -18,7 +17,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.io.FileOutputStream
 import java.io.IOException
 import java.net.URL
 import java.util.concurrent.TimeUnit
@@ -34,7 +32,6 @@ class RecyclerviewAdapter(_lifeCycle : LifecycleCoroutineScope, _items : List<In
 
     lateinit var lifeCycleScope : LifecycleCoroutineScope
     private lateinit var context : Context
-    var job : Job? = null
 
     init {
         items = _items
@@ -51,8 +48,8 @@ class RecyclerviewAdapter(_lifeCycle : LifecycleCoroutineScope, _items : List<In
     }
 
     override fun onViewRecycled(holder: ViewHolder) {
-        job?.cancel()
         super.onViewRecycled(holder)
+        holder.stopJob()
     }
 
     override fun getItemCount() = items.size
@@ -60,6 +57,7 @@ class RecyclerviewAdapter(_lifeCycle : LifecycleCoroutineScope, _items : List<In
     inner class ViewHolder(view: View): RecyclerView.ViewHolder(view){
         private val imageToDisplay = view.findViewById<ImageView>(R.id.picture_recyclerview)
         private val progressBar = view.findViewById<ProgressBar>(R.id.progress_bar_recyclerview)
+        var job : Job? = null
 
         fun bind(numberPicture: Int) {
 
@@ -115,12 +113,14 @@ class RecyclerviewAdapter(_lifeCycle : LifecycleCoroutineScope, _items : List<In
             }
         }
 
-        suspend fun cachePicture(bmp: Bitmap?, numberPicture: Int) = withContext(Dispatchers.IO) {
-
+        suspend fun cachePicture(bmp: Bitmap?, numberPicture: Int) = withContext(Dispatchers.Default) {
             val file = File(context.cacheDir, "$numberPicture.jpg")
             file.outputStream().use {
                 bmp?.compress(Bitmap.CompressFormat.JPEG, 100, it)
             }
+        }
+        fun stopJob(){
+            job?.cancel()
         }
     }
 }
